@@ -213,6 +213,17 @@ sub main {
         %graphs = (%graphs, %{$graph_package->graphs});
     }
 
+    #### MageHost Fix:
+    # Allow to skip graph by setting Munin config variable:
+    #     [mysql]
+    #     env.skip_binlog_commits 1
+    for my $key (keys %graphs) {
+        if ( defined $ENV{'skip_'.$key} && $ENV{'skip_'.$key} ) {
+            delete $graphs{$key};
+        }
+    }
+    #### /MageHost fix
+    
     my %command_map = (
         'autoconf' => \&autoconf,
         'config'   => \&config,
