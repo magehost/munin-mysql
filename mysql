@@ -24,7 +24,6 @@ Non-default example:
     env.mysqluser root
     env.mysqlpassword geheim
 
-
 Warning and critical values can be set via the environment in the usual way. 
 For example: 
  
@@ -55,6 +54,14 @@ If you want to use a table other than maatkit.heartbeat, name it like this:
 
 or:
 	env.pt_heartbeat_table schema.heartbeattable
+
+=head2 Skipping graphs
+
+You can skip graphs by using skip_* configuration variables:
+
+  [mysql]
+    env.skip_binlog_commits 1
+    env.skip_innodb_bpool_internal_breakdown 1
 
 =head1 DEPENDENCIES
 
@@ -213,17 +220,12 @@ sub main {
         %graphs = (%graphs, %{$graph_package->graphs});
     }
 
-    #### MageHost Fix:
-    # Allow to skip graph by setting Munin config variable:
-    #     [mysql]
-    #     env.skip_binlog_commits 1
     for my $key (keys %graphs) {
         if ( defined $ENV{'skip_'.$key} && $ENV{'skip_'.$key} ) {
             delete $graphs{$key};
         }
     }
-    #### /MageHost fix
-    
+
     my %command_map = (
         'autoconf' => \&autoconf,
         'config'   => \&config,
