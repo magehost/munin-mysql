@@ -139,6 +139,7 @@ use Math::BigInt; # Used to append "=> lib 'GMP'" here, but GMP caused
                   # debugging effort.
 use Module::Pluggable search_path => ['Munin::MySQL::Graph'], require => 1, inner => 0;
 use Munin::Plugin;
+use Digest::MD5;
 
 # Check that multigraph is supported
 need_multigraph();
@@ -305,9 +306,9 @@ sub config {
 
             next if ($v eq '');
 
-            printf("%s.%s %s\n", clean_fieldname($ds->{name}), $k, $v);
+            printf("%s.%s %s\n", my_clean_fieldname($ds->{name}), $k, $v);
         }
-        print_thresholds(clean_fieldname($ds->{name}));
+        print_thresholds(my_clean_fieldname($ds->{name}));
     }
 }
 
@@ -324,7 +325,7 @@ sub show {
             ? $ds->{value}($data) 
                 : $data->{$ds->{name}};
 
-        printf "%s.value %s\n", clean_fieldname($ds->{name}), defined($value) ? $value : 'U';
+        printf "%s.value %s\n", my_clean_fieldname($ds->{name}), defined($value) ? $value : 'U';
 
     }
 }
@@ -335,6 +336,15 @@ sub show {
 #  U T I L I T Y   S U B S
 #---------------------------------------------------------------------
 
+sub my_clean_fieldname {
+    my ($name) = @_;
+    $name = clean_fieldname($name);
+    #if (length $name > 15) {
+    #    $name = substr($name,0,10) . substr(Digest::MD5::md5_hex($name), -5)
+    #}
+#    $name =~ s/(M|m)emory/\1em/g;
+    return $name;
+}
 
 sub build_instance {
     $instance = basename($0);
